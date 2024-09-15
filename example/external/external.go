@@ -3,9 +3,9 @@ package external
 import (
 	"cmp"
 	"context"
-	"github.com/justenwalker/genstrument/example"
-	"github.com/justenwalker/genstrument/example/types"
-	"github.com/justenwalker/genstrument/example/types/dot"
+	"genstrument/example"
+	"genstrument/example/types"
+	"genstrument/example/types/dot"
 )
 
 // SimpleService

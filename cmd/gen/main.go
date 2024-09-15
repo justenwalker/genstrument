@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/justenwalker/genstrument/internal/gen"
+	"github.com/justenwalker/genstrument/cmd/gen/internal/gen"
 	"log"
 	"os"
 )

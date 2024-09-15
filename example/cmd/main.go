@@ -6,12 +6,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/justenwalker/genstrument/example"
-	"github.com/justenwalker/genstrument/example/gen"
-	"github.com/justenwalker/genstrument/example/oteltracer"
-	"github.com/justenwalker/genstrument/example/types"
-	"github.com/justenwalker/genstrument/example/types/dot"
-	gopkg "github.com/justenwalker/genstrument/example/types/go-pkg"
+	"genstrument/example"
+	"genstrument/example/gen"
+	"genstrument/example/oteltracer"
+	"genstrument/example/types"
+	"genstrument/example/types/dot"
+	gopkg "genstrument/example/types/go-pkg"
 	"log"
 
 	"github.com/go-logr/stdr"

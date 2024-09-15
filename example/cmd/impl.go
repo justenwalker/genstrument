@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/justenwalker/genstrument/example"
-	"github.com/justenwalker/genstrument/example/types"
-	"github.com/justenwalker/genstrument/example/types/dot"
-	gopkg "github.com/justenwalker/genstrument/example/types/go-pkg"
+	"genstrument/example"
+	"genstrument/example/types"
+	"genstrument/example/types/dot"
+	gopkg "genstrument/example/types/go-pkg"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

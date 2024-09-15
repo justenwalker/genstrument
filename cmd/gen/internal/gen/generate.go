@@ -237,7 +237,7 @@ func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImp
 		var arg TemplateFunctionArg
 		arg.Name = a.Name
 		arg.Type = it.resolveExpr(a.Type)
-		fun.ArgHasAttributes = fun.ArgHasAttributes || l.extractFuncArgument(&f, &arg, a, it, cache)
+		fun.ArgHasAttributes = l.extractFuncArgument(&f, &arg, a, it, cache) || fun.ArgHasAttributes
 		if l.typeIsContext(a.Type) && ctxArg == -1 {
 			arg.Name = "ctx"
 			ctxArg = i
@@ -256,18 +256,7 @@ func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImp
 		var arg TemplateFunctionArg
 		arg.Name = a.Name
 		arg.Type = it.resolveExpr(a.Type)
-		if setter, ok := f.Config.AttributeFunctions[a.Name]; ok {
-			arg.AttrKey = setter.Key
-			if typ := l.findType(setter.Func); typ != nil {
-				arg.AttrFunc = it.resolveExpr(setter.Func)
-				fun.ReturnHasAttributes = true
-			} else {
-				if typ = l.findType(a.Type); typ != nil {
-					arg.AttrFunc = cache.autoSetterFunc(typ)
-				}
-				fun.ReturnHasAttributes = fun.ReturnHasAttributes || arg.AttrFunc != ""
-			}
-		}
+		fun.ReturnHasAttributes = l.extractFuncArgument(&f, &arg, a, it, cache) || fun.ReturnHasAttributes
 		if l.typeIsError(a.Type) && errArg == -1 {
 			arg.Name = "err"
 			errArg = i
@@ -289,6 +278,10 @@ func (l *loader) extractFuncArgument(f *Function, arg *TemplateFunctionArg, a Ar
 	if !ok {
 		return false
 	}
+	if setter.Key == "" {
+		return false
+	}
+	arg.AttrKey = setter.Key
 	var typeParamName string
 	if id, ok := a.Type.(*ast.Ident); ok {
 		for _, tp := range f.TypeParams {
@@ -304,9 +297,6 @@ func (l *loader) extractFuncArgument(f *Function, arg *TemplateFunctionArg, a Ar
 			return false
 		}
 		return true
-	}
-	if setter.Key == "" {
-		return false
 	}
 	if typeParamName != "" {
 		l.recordError(a.Type.Pos(), fmt.Errorf("cannot find auto-setter function for generic type %s", typeParamName))

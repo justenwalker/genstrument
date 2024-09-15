@@ -4,11 +4,11 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"genstrument/example/types"
+	dupe "genstrument/example/types"
+	. "genstrument/example/types/dot"
+	"genstrument/example/types/go-pkg"
 	"github.com/justenwalker/genstrument"
-	"github.com/justenwalker/genstrument/example/types"
-	dupe "github.com/justenwalker/genstrument/example/types"
-	. "github.com/justenwalker/genstrument/example/types/dot"
-	"github.com/justenwalker/genstrument/example/types/go-pkg"
 )
 
 // GenericService
@@ -51,12 +51,6 @@ type ComplexService interface {
 	FuncMyDupeType(ctx context.Context, myType dupe.MyType) (string, error)
 }
 
-type Name string
-
-type ServiceType struct {
-	FooBarBaz string
-}
-
 // MyFunction
 //
 // +genstrument:wrap
@@ -68,18 +62,6 @@ type ServiceType struct {
 // +genstrument:attr key4 myType AnyTypeSetter
 func MyFunction(ctx context.Context, s ServiceType, d1 Type1Dot, d2 Type2Dot, myType types.MyType) ([]byte, error) {
 	return nil, nil
-}
-
-func StringAttributeSetter[S ~string](s S, attr genstrument.AttributeSetter) {
-	attr.String(string(s))
-}
-
-func ServiceTypeSetter(st ServiceType, attr genstrument.AttributeSetter) {
-	attr.Attribute("foobarbaz").String(st.FooBarBaz)
-}
-
-func AnyTypeSetter(v any, attr genstrument.AttributeSetter) {
-	attr.String(fmt.Sprintf("%v", v))
 }
 
 // GenericFunction
@@ -94,10 +76,6 @@ func GenericFunction[T ~string, PT *T, PTT cmp.Ordered](ctx context.Context, t T
 	return ServiceType{}, nil
 }
 
-type Constraint[T any] interface {
-	Func(T) error
-}
-
 // GenericTypeConstraints
 //
 // +genstrument:wrap
@@ -105,4 +83,16 @@ type Constraint[T any] interface {
 func GenericTypeConstraints[P any, S interface{ ~[]byte | string }, ES ~[]E, E any, C Constraint[int], O cmp.Ordered](ctx context.Context, p P, es ES, e E, c C, o O) (S, error) {
 	var zero S
 	return zero, nil
+}
+
+func StringAttributeSetter[S ~string](s S, attr genstrument.AttributeSetter) {
+	attr.String(string(s))
+}
+
+func ServiceTypeSetter(st ServiceType, attr genstrument.AttributeSetter) {
+	attr.Attribute("foobarbaz").String(st.FooBarBaz)
+}
+
+func AnyTypeSetter(v any, attr genstrument.AttributeSetter) {
+	attr.String(fmt.Sprintf("%v", v))
 }
