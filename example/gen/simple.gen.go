@@ -3,43 +3,69 @@
 package gen
 
 import (
-	"context"
-	"genstrument/example"
-	"github.com/justenwalker/genstrument"
+    "context"
+    "genstrument/example"
+    "github.com/justenwalker/genstrument"
 )
 
 // InstrumentSimpleService adds APM traces around the wrapped example.SimpleService using the provided tracer.
 func InstrumentSimpleService(tracer genstrument.Tracer, wrapped example.SimpleService) example.SimpleService {
-	return &instrumentedSimpleService{
-		tracer:  tracer,
-		wrapped: wrapped,
-	}
+    return &instrumentedSimpleService{
+        tracer: tracer,
+        wrapped: wrapped,
+    }
 }
 
 type instrumentedSimpleService struct {
-	wrapped example.SimpleService
-	tracer  genstrument.Tracer
+    wrapped example.SimpleService
+    tracer genstrument.Tracer
 }
 
-func (w *instrumentedSimpleService) SayHello(ctx context.Context, message string) (result string, err error) {
-	// Start Span
-	var span genstrument.Span
-	ctx, span = w.tracer.StartSpan(ctx, "example.SimpleService:SayHello")
-	// Set Input Attributes
-	genstrument.SetStringAttribute(message, span.Attribute("message"))
+func (w *instrumentedSimpleService) SayHello(ctx context.Context,message string) (result string,err error) {
+    // Start Span
+    var span genstrument.Span
+    ctx, span = w.tracer.StartSpan(ctx,"helloOp")
+    // Set Input Attributes
+    genstrument.SetStringAttribute(message,span.Attribute("message"))
 
-	// call Wrapped Function
-	result, err = w.wrapped.SayHello(ctx, message)
-	// Finish Span with Error
-	if err != nil {
-		span.EndError(err)
-		return
-	}
-	// Set Return Attributes
-	genstrument.SetStringAttribute(result, span.Attribute("result"))
-	genstrument.SetErrorAttribute(err, span.Attribute("err"))
+    // call Wrapped Function
+    result,err =  w.wrapped.SayHello(ctx,message)
+    // Finish Span with Error
+    if err != nil {
+        span.EndError(err)
+        return
+    }
+    // Set Return Attributes
+    genstrument.SetStringAttribute(result,span.Attribute("result"))
+    genstrument.SetErrorAttribute(err,span.Attribute("err"))
 
-	// Finish Span with Success
-	span.EndSuccess(ctx)
-	return
+    // Finish Span with Success
+    span.EndSuccess(ctx)
+    return
+}
+
+// TraceSimpleFunction traces the given fn using the provided tracer tr.
+func TraceSimpleFunction(tr genstrument.Tracer) func(message string) (result string,err error)  {
+    return func(message string) (result string,err error) {
+        var span genstrument.Span
+        ctx := context.Background()
+        ctx, span = tr.StartSpan(ctx,"helloOp")
+        // Set Input Attributes
+        genstrument.SetStringAttribute(message,span.Attribute("message"))
+
+        // call Wrapped Function
+        result,err =  example.SimpleFunction(message)
+        // Finish Span with Error
+        if err != nil {
+            span.EndError(err)
+            return
+        }
+        // Set Return Attributes
+        genstrument.SetStringAttribute(result,span.Attribute("result"))
+        genstrument.SetErrorAttribute(err,span.Attribute("err"))
+
+        // Finish Span with Success
+        span.EndSuccess(ctx)
+        return
+    }
 }

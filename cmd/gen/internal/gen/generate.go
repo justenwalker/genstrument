@@ -249,8 +249,16 @@ func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImp
 		if i == ctxArg {
 			fun.ContextArg = arg.Name
 		}
-
 		fun.Arguments = append(fun.Arguments, arg)
+	}
+	if ctxArg == -1 {
+		fun.ContextArg = d.disambiguate("ctx")
+		pkg, err := l.importPackage("context")
+		if err != nil {
+			return fun, fmt.Errorf("unable to use context.Context: %w", err)
+		}
+		contextPkg := l.pkgPathToImport[pkg.PkgPath]
+		fun.ContextVar = fmt.Sprintf("%s := %s.Background()", fun.ContextArg, contextPkg.alias)
 	}
 	for i, a := range f.Returns {
 		var arg TemplateFunctionArg

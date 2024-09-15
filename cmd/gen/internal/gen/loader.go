@@ -250,14 +250,10 @@ func (l *loader) loadFunction(iface *Interface, name *ast.Ident, ft *ast.FuncTyp
 		return Function{}
 	}
 	if ft.Params != nil {
-		for i, p := range ft.Params.List {
+		for _, p := range ft.Params.List {
 			arg, err := l.loadArgument(p, fun.TypeParams)
 			if err != nil {
 				l.recordError(p.Pos(), fmt.Errorf("bad function argument '%s': %w", p.Names, err))
-				return Function{}
-			}
-			if i == 0 && !l.typeIsContext(arg.Type) { // must be context.Context
-				l.recordError(ft.Pos(), fmt.Errorf("function's first argument must be context.Context"))
 				return Function{}
 			}
 			fun.Arguments = append(fun.Arguments, arg)

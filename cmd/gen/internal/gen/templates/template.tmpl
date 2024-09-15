@@ -41,6 +41,9 @@ type {{ $t.TypeName }}{{ $t.TypeParamSpec }} struct {
 func (w *{{ $t.TypeName }}{{ $t.TypeParamNames }}) {{ $f.Name }}({{ $f | arg_list }}) {{$f | return_list}} {
     // Start Span
     var span genstrument.Span
+    {{- if $f.ContextVar }}
+    {{ $f.ContextVar }}
+    {{- end }}
     {{ $f.ContextArg }}, span = w.tracer.StartSpan({{ $f.ContextArg }},"{{ $f.OperationName }}")
 
     {{- if $f.ArgHasAttributes }}
@@ -84,6 +87,9 @@ func (w *{{ $t.TypeName }}{{ $t.TypeParamNames }}) {{ $f.Name }}({{ $f | arg_lis
 func {{ $f.WrapperName }}{{ $f.TypeParamSpec }}({{ $f.TracerArg }} genstrument.Tracer) func({{ $f | arg_list }}) {{$f | return_list}}  {
     return func({{ $f | arg_list }}) {{$f | return_list}} {
         var span genstrument.Span
+        {{- if $f.ContextVar }}
+        {{ $f.ContextVar }}
+        {{- end }}
         {{ $f.ContextArg }}, span = {{ $f.TracerArg }}.StartSpan({{ $f.ContextArg }},"{{ $f.OperationName }}")
 
         {{- if $f.ArgHasAttributes }}

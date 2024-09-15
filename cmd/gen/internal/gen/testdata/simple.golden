@@ -24,7 +24,7 @@ type instrumentedSimpleService struct {
 func (w *instrumentedSimpleService) SayHello(ctx context.Context, message string) (result string, err error) {
 	// Start Span
 	var span genstrument.Span
-	ctx, span = w.tracer.StartSpan(ctx, "example.SimpleService:SayHello")
+	ctx, span = w.tracer.StartSpan(ctx, "helloOp")
 	// Set Input Attributes
 	genstrument.SetStringAttribute(message, span.Attribute("message"))
 
@@ -42,4 +42,30 @@ func (w *instrumentedSimpleService) SayHello(ctx context.Context, message string
 	// Finish Span with Success
 	span.EndSuccess(ctx)
 	return
+}
+
+// TraceSimpleFunction traces the given fn using the provided tracer tr.
+func TraceSimpleFunction(tr genstrument.Tracer) func(message string) (result string, err error) {
+	return func(message string) (result string, err error) {
+		var span genstrument.Span
+		ctx := context.Background()
+		ctx, span = tr.StartSpan(ctx, "helloOp")
+		// Set Input Attributes
+		genstrument.SetStringAttribute(message, span.Attribute("message"))
+
+		// call Wrapped Function
+		result, err = example.SimpleFunction(message)
+		// Finish Span with Error
+		if err != nil {
+			span.EndError(err)
+			return
+		}
+		// Set Return Attributes
+		genstrument.SetStringAttribute(result, span.Attribute("result"))
+		genstrument.SetErrorAttribute(err, span.Attribute("err"))
+
+		// Finish Span with Success
+		span.EndSuccess(ctx)
+		return
+	}
 }

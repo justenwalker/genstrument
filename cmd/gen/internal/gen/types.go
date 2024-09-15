@@ -78,6 +78,7 @@ type TemplateFunctionConfig struct {
 	TypeParamNames      string
 	TracerArg           string
 	ContextArg          string
+	ContextVar          string
 	ErrorReturn         string
 	ArgHasAttributes    bool
 	ReturnHasAttributes bool
