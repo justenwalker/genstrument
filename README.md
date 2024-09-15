@@ -5,6 +5,8 @@ genstrument is a Go Code Generator for instrumenting interfaces and functions.
 It takes interface and function definitions with special doc comments and creates wrapper implementations
 which add instrumentation.
 
+For a full example, see the [Example Code](./example).
+
 ## Comment Directives
 
 Comments are made on the associated Interface type or functions for which the wrapper is generated. 
@@ -186,5 +188,3 @@ func TraceSimpleFunction(tr genstrument.Tracer) func(message string) (result str
     }
 }
 ```
-
-For a full example, see the [Example Code](./example).
