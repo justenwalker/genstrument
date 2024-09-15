@@ -23,9 +23,9 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../simple.go -output ../gen/simple.gen.go
-//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../complex.go -output ../gen/complex.gen.go
-//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../external/external.go -output ../external/external.gen.go
+//go:generate go run github.com/justenwalker/genstrument/genstrument -input ../simple.go -output ../gen/simple.gen.go
+//go:generate go run github.com/justenwalker/genstrument/genstrument -input ../complex.go -output ../gen/complex.gen.go
+//go:generate go run github.com/justenwalker/genstrument/genstrument -input ../external/external.go -output ../external/external.gen.go
 
 var (
 	fooKey     = attribute.Key("ex.com/foo")

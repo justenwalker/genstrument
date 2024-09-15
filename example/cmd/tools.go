@@ -3,5 +3,5 @@
 package main
 
 import (
-	_ "github.com/justenwalker/genstrument/cmd/gen"
+	_ "github.com/justenwalker/genstrument/genstrument"
 )

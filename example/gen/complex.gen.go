@@ -3,263 +3,263 @@
 package gen
 
 import (
-    "cmp"
-    "context"
-    "genstrument/example"
-    "genstrument/example/types"
-    "genstrument/example/types/dot"
-    "genstrument/example/types/go-pkg"
-    "github.com/justenwalker/genstrument"
+	"cmp"
+	"context"
+	"genstrument/example"
+	"genstrument/example/types"
+	"genstrument/example/types/dot"
+	"genstrument/example/types/go-pkg"
+	"github.com/justenwalker/genstrument"
 )
 
 // TraceGenericService adds APM traces around the wrapped example.GenericService using the provided tracer.
-func TraceGenericService[T any,PT cmp.Ordered](tracer genstrument.Tracer, wrapped example.GenericService[T,PT]) example.GenericService[T,PT] {
-    return &tracedGenericService[T,PT]{
-        tracer: tracer,
-        wrapped: wrapped,
-    }
+func TraceGenericService[T any, PT cmp.Ordered](tracer genstrument.Tracer, wrapped example.GenericService[T, PT]) example.GenericService[T, PT] {
+	return &tracedGenericService[T, PT]{
+		tracer:  tracer,
+		wrapped: wrapped,
+	}
 }
 
-type tracedGenericService[T any,PT cmp.Ordered] struct {
-    wrapped example.GenericService[T,PT]
-    tracer genstrument.Tracer
+type tracedGenericService[T any, PT cmp.Ordered] struct {
+	wrapped example.GenericService[T, PT]
+	tracer  genstrument.Tracer
 }
 
-func (w *tracedGenericService[T,PT]) FuncIsGeneric(ctx context.Context,t T) (ret0 PT,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"example.GenericService:FuncIsGeneric")
+func (w *tracedGenericService[T, PT]) FuncIsGeneric(ctx context.Context, t T) (ret0 PT, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "example.GenericService:FuncIsGeneric")
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncIsGeneric(ctx,t)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncIsGeneric(ctx, t)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
 // InstrumentComplexService adds APM traces around the wrapped example.ComplexService using the provided tracer.
 func InstrumentComplexService(tracer genstrument.Tracer, wrapped example.ComplexService) example.ComplexService {
-    return &instrumentedComplexService{
-        tracer: tracer,
-        wrapped: wrapped,
-    }
+	return &instrumentedComplexService{
+		tracer:  tracer,
+		wrapped: wrapped,
+	}
 }
 
 type instrumentedComplexService struct {
-    wrapped example.ComplexService
-    tracer genstrument.Tracer
+	wrapped example.ComplexService
+	tracer  genstrument.Tracer
 }
 
-func (w *instrumentedComplexService) FuncNoError(ctx context.Context)  {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"example.ComplexService:FuncNoError")
+func (w *instrumentedComplexService) FuncNoError(ctx context.Context) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "example.ComplexService:FuncNoError")
 
-    // call Wrapped Function
-     w.wrapped.FuncNoError(ctx)
+	// call Wrapped Function
+	w.wrapped.FuncNoError(ctx)
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncArray(ctx context.Context,str string,st example.ServiceType) (res0 [32]byte,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"example.ComplexService:FuncArray")
-    // Set Input Attributes
-    example.StringAttributeSetter(str,span.Attribute("key1"))
-    example.ServiceTypeSetter(st,span.Attribute("key2"))
+func (w *instrumentedComplexService) FuncArray(ctx context.Context, str string, st example.ServiceType) (res0 [32]byte, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "example.ComplexService:FuncArray")
+	// Set Input Attributes
+	example.StringAttributeSetter(str, span.Attribute("key1"))
+	example.ServiceTypeSetter(st, span.Attribute("key2"))
 
-    // call Wrapped Function
-    res0,err =  w.wrapped.FuncArray(ctx,str,st)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
-    // Set Return Attributes
-    example.AnyTypeSetter(res0,span.Attribute("result"))
-    example.AnyTypeSetter(err,span.Attribute("error"))
+	// call Wrapped Function
+	res0, err = w.wrapped.FuncArray(ctx, str, st)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
+	// Set Return Attributes
+	example.AnyTypeSetter(res0, span.Attribute("result"))
+	example.AnyTypeSetter(err, span.Attribute("error"))
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncSlice(ctx context.Context,name example.Name,st example.ServiceType) (ret0 []byte,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"example.ComplexService:FuncSlice")
-    // Set Input Attributes
-    example.StringAttributeSetter(name,span.Attribute("key1"))
-    example.ServiceTypeSetter(st,span.Attribute("key2"))
+func (w *instrumentedComplexService) FuncSlice(ctx context.Context, name example.Name, st example.ServiceType) (ret0 []byte, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "example.ComplexService:FuncSlice")
+	// Set Input Attributes
+	example.StringAttributeSetter(name, span.Attribute("key1"))
+	example.ServiceTypeSetter(st, span.Attribute("key2"))
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncSlice(ctx,name,st)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncSlice(ctx, name, st)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncGoPkg2(ctx context.Context,mt gopkg.GoType2) (ret0 bool,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"goPkg2")
+func (w *instrumentedComplexService) FuncGoPkg2(ctx context.Context, mt gopkg.GoType2) (ret0 bool, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "goPkg2")
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncGoPkg2(ctx,mt)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncGoPkg2(ctx, mt)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncPackageType(ctx context.Context,myType types.MyType) (ret0 int64,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"packageType")
-    // Set Input Attributes
-    types.MyTypeAttr(myType,span.Attribute("type"))
+func (w *instrumentedComplexService) FuncPackageType(ctx context.Context, myType types.MyType) (ret0 int64, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "packageType")
+	// Set Input Attributes
+	types.MyTypeAttr(myType, span.Attribute("type"))
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncPackageType(ctx,myType)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncPackageType(ctx, myType)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncDotTypes(ctx context.Context,name example.Name,d1 dot.Type1Dot,d2 dot.Type2Dot) (ret0 string,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"dots")
-    // Set Input Attributes
-    genstrument.SetStringAttribute(name,span.Attribute("name"))
-    dot.Type1Attr(d1,span.Attribute("dot1"))
-    dot.Type2Attr(d2,span.Attribute("dot2"))
+func (w *instrumentedComplexService) FuncDotTypes(ctx context.Context, name example.Name, d1 dot.Type1Dot, d2 dot.Type2Dot) (ret0 string, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "dots")
+	// Set Input Attributes
+	genstrument.SetStringAttribute(name, span.Attribute("name"))
+	dot.Type1Attr(d1, span.Attribute("dot1"))
+	dot.Type2Attr(d2, span.Attribute("dot2"))
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncDotTypes(ctx,name,d1,d2)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncDotTypes(ctx, name, d1, d2)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
-func (w *instrumentedComplexService) FuncMyDupeType(ctx context.Context,myType types.MyType) (ret0 string,err error) {
-    // Start Span
-    var span genstrument.Span
-    ctx, span = w.tracer.StartSpan(ctx,"dupes")
-    // Set Input Attributes
-    types.MyTypeAttr(myType,span.Attribute("mine"))
+func (w *instrumentedComplexService) FuncMyDupeType(ctx context.Context, myType types.MyType) (ret0 string, err error) {
+	// Start Span
+	var span genstrument.Span
+	ctx, span = w.tracer.StartSpan(ctx, "dupes")
+	// Set Input Attributes
+	types.MyTypeAttr(myType, span.Attribute("mine"))
 
-    // call Wrapped Function
-    ret0,err =  w.wrapped.FuncMyDupeType(ctx,myType)
-    // Finish Span with Error
-    if err != nil {
-        span.EndError(err)
-        return
-    }
+	// call Wrapped Function
+	ret0, err = w.wrapped.FuncMyDupeType(ctx, myType)
+	// Finish Span with Error
+	if err != nil {
+		span.EndError(err)
+		return
+	}
 
-    // Finish Span with Success
-    span.EndSuccess(ctx)
-    return
+	// Finish Span with Success
+	span.EndSuccess(ctx)
+	return
 }
 
 // TraceMyFunction traces the given fn using the provided tracer tr.
-func TraceMyFunction(tr genstrument.Tracer) func(ctx context.Context,s example.ServiceType,d1 dot.Type1Dot,d2 dot.Type2Dot,myType types.MyType) (ret0 []byte,err error)  {
-    return func(ctx context.Context,s example.ServiceType,d1 dot.Type1Dot,d2 dot.Type2Dot,myType types.MyType) (ret0 []byte,err error) {
-        var span genstrument.Span
-        ctx, span = tr.StartSpan(ctx,"func1")
-        // Set Input Attributes
-        example.AnyTypeSetter(s,span.Attribute("key1"))
-        example.AnyTypeSetter(d1,span.Attribute("key2"))
-        example.AnyTypeSetter(d2,span.Attribute("key3"))
-        example.AnyTypeSetter(myType,span.Attribute("key4"))
+func TraceMyFunction(tr genstrument.Tracer) func(ctx context.Context, s example.ServiceType, d1 dot.Type1Dot, d2 dot.Type2Dot, myType types.MyType) (ret0 []byte, err error) {
+	return func(ctx context.Context, s example.ServiceType, d1 dot.Type1Dot, d2 dot.Type2Dot, myType types.MyType) (ret0 []byte, err error) {
+		var span genstrument.Span
+		ctx, span = tr.StartSpan(ctx, "func1")
+		// Set Input Attributes
+		example.AnyTypeSetter(s, span.Attribute("key1"))
+		example.AnyTypeSetter(d1, span.Attribute("key2"))
+		example.AnyTypeSetter(d2, span.Attribute("key3"))
+		example.AnyTypeSetter(myType, span.Attribute("key4"))
 
-        // call Wrapped Function
-        ret0,err =  example.MyFunction(ctx,s,d1,d2,myType)
-        // Finish Span with Error
-        if err != nil {
-            span.EndError(err)
-            return
-        }
+		// call Wrapped Function
+		ret0, err = example.MyFunction(ctx, s, d1, d2, myType)
+		// Finish Span with Error
+		if err != nil {
+			span.EndError(err)
+			return
+		}
 
-        // Finish Span with Success
-        span.EndSuccess(ctx)
-        return
-    }
+		// Finish Span with Success
+		span.EndSuccess(ctx)
+		return
+	}
 }
 
 // TraceGenericFunction traces the given fn using the provided tracer tr.
-func TraceGenericFunction[T ~string,PT *T,PTT cmp.Ordered](tr genstrument.Tracer) func(ctx context.Context,t T,tr0 PT,pt PT,err PTT) (ret0 example.ServiceType,err1 error)  {
-    return func(ctx context.Context,t T,tr0 PT,pt PT,err PTT) (ret0 example.ServiceType,err1 error) {
-        var span genstrument.Span
-        ctx, span = tr.StartSpan(ctx,"example:GenericFunction")
-        // Set Input Attributes
-        example.AnyTypeSetter(t,span.Attribute("key1"))
-        example.AnyTypeSetter(tr0,span.Attribute("key2"))
-        example.AnyTypeSetter(pt,span.Attribute("key3"))
-        example.AnyTypeSetter(err,span.Attribute("key4"))
+func TraceGenericFunction[T ~string, PT *T, PTT cmp.Ordered](tr genstrument.Tracer) func(ctx context.Context, t T, tr0 PT, pt PT, err PTT) (ret0 example.ServiceType, err1 error) {
+	return func(ctx context.Context, t T, tr0 PT, pt PT, err PTT) (ret0 example.ServiceType, err1 error) {
+		var span genstrument.Span
+		ctx, span = tr.StartSpan(ctx, "example:GenericFunction")
+		// Set Input Attributes
+		example.AnyTypeSetter(t, span.Attribute("key1"))
+		example.AnyTypeSetter(tr0, span.Attribute("key2"))
+		example.AnyTypeSetter(pt, span.Attribute("key3"))
+		example.AnyTypeSetter(err, span.Attribute("key4"))
 
-        // call Wrapped Function
-        ret0,err1 =  example.GenericFunction[T,PT,PTT](ctx,t,tr0,pt,err)
-        // Finish Span with Error
-        if err1 != nil {
-            span.EndError(err1)
-            return
-        }
+		// call Wrapped Function
+		ret0, err1 = example.GenericFunction[T, PT, PTT](ctx, t, tr0, pt, err)
+		// Finish Span with Error
+		if err1 != nil {
+			span.EndError(err1)
+			return
+		}
 
-        // Finish Span with Success
-        span.EndSuccess(ctx)
-        return
-    }
+		// Finish Span with Success
+		span.EndSuccess(ctx)
+		return
+	}
 }
 
 // ObserveGenericTypeConstraints traces the given fn using the provided tracer tr.
-func ObserveGenericTypeConstraints[P any,S interface{~[]byte|string},ES ~[]E,E any,C example.Constraint[int],O cmp.Ordered](tr genstrument.Tracer) func(ctx context.Context,p P,es ES,e E,c C,o O) (ret0 S,err error)  {
-    return func(ctx context.Context,p P,es ES,e E,c C,o O) (ret0 S,err error) {
-        var span genstrument.Span
-        ctx, span = tr.StartSpan(ctx,"example:GenericTypeConstraints")
+func ObserveGenericTypeConstraints[P any, S interface{ ~[]byte | string }, ES ~[]E, E any, C example.Constraint[int], O cmp.Ordered](tr genstrument.Tracer) func(ctx context.Context, p P, es ES, e E, c C, o O) (ret0 S, err error) {
+	return func(ctx context.Context, p P, es ES, e E, c C, o O) (ret0 S, err error) {
+		var span genstrument.Span
+		ctx, span = tr.StartSpan(ctx, "example:GenericTypeConstraints")
 
-        // call Wrapped Function
-        ret0,err =  example.GenericTypeConstraints[P,S,ES,E,C,O](ctx,p,es,e,c,o)
-        // Finish Span with Error
-        if err != nil {
-            span.EndError(err)
-            return
-        }
+		// call Wrapped Function
+		ret0, err = example.GenericTypeConstraints[P, S, ES, E, C, O](ctx, p, es, e, c, o)
+		// Finish Span with Error
+		if err != nil {
+			span.EndError(err)
+			return
+		}
 
-        // Finish Span with Success
-        span.EndSuccess(ctx)
-        return
-    }
+		// Finish Span with Success
+		span.EndSuccess(ctx)
+		return
+	}
 }

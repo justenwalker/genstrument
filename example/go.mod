@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/go-logr/stdr v1.2.2
 	github.com/justenwalker/genstrument v0.0.0
-	github.com/justenwalker/genstrument/cmd/gen v0.0.0
+	github.com/justenwalker/genstrument/genstrument v0.0.0
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.30.0
 	go.opentelemetry.io/otel/sdk v1.30.0
@@ -24,4 +24,4 @@ require (
 
 replace github.com/justenwalker/genstrument => ../
 
-replace github.com/justenwalker/genstrument/cmd/gen => ./../gen
+replace github.com/justenwalker/genstrument/genstrument => ../genstrument

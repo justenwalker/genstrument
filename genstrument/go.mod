@@ -1,4 +1,4 @@
-module github.com/justenwalker/genstrument/gen
+module github.com/justenwalker/genstrument/genstrument
 
 go 1.23.0
 

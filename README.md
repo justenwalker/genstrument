@@ -7,6 +7,21 @@ which add instrumentation.
 
 For a full example, see the [Example Code](./example).
 
+## Usage
+
+You can use `go run` to run the command directly from a `//go:generate` comment
+
+```go
+//go:generate go run github.com/justenwalker/genstrument/genstrument@v0.0.2 -input source.go -output dest.gen.go
+```
+
+You can also install the binary and run it directly
+
+```shell
+go install github.com/justenwalker/genstrument/genstrument@latest
+
+```
+
 ## Comment Directives
 
 Comments are made on the associated Interface type or functions for which the wrapper is generated. 
