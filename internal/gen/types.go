@@ -16,6 +16,7 @@ type FunctionType string
 type FunctionConfig struct {
 	OperationName      string
 	Prefix             string
+	ExternalType       *ast.SelectorExpr
 	AttributeFunctions map[string]*AttributeKeyFunc
 }
 
@@ -34,6 +35,7 @@ type Function struct {
 
 type InterfaceConfig struct {
 	Prefix            string
+	ExternalType      *ast.SelectorExpr
 	ConstructorPrefix string
 }
 
@@ -92,6 +94,7 @@ type TemplateFunctionArg struct {
 
 type TemplateTypeConfig struct {
 	Name            string
+	ExternalType    string
 	TypeName        string
 	ConstructorName string
 	QualifiedName   string

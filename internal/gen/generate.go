@@ -96,6 +96,9 @@ func (l *loader) generate(file *ParsedFile, outFile string) (*TemplateData, erro
 	for _, iface := range file.Interfaces {
 		var wi TemplateTypeConfig
 		wi.Name = iface.Name.Name
+		if iface.Config.ExternalType != nil {
+			wi.ExternalType = it.resolveExpr(iface.Config.ExternalType)
+		}
 		wi.ConstructorName = prefix(wi.Name, iface.Config.ConstructorPrefix, constructorPrefix)
 		wi.TypeName = prefix(wi.Name, iface.Config.Prefix, typePrefix)
 		for _, f := range iface.Functions {
@@ -108,11 +111,17 @@ func (l *loader) generate(file *ParsedFile, outFile string) (*TemplateData, erro
 		specs := it.TypeParams(iface.TypeParams)
 		wi.TypeParamSpec = typeParamsToSpec(iface.TypeParams, specs)
 		wi.TypeParamNames = typeParamNames(iface.TypeParams)
-		wi.QualifiedName = it.resolveExpr(iface.Name)
+		if iface.Config.ExternalType != nil {
+			wi.QualifiedName = it.resolveExpr(iface.Config.ExternalType)
+		} else {
+			wi.QualifiedName = it.resolveExpr(iface.Name)
+		}
 		exportFile.Types = append(exportFile.Types, wi)
 	}
 	exportFile.Imports = it.Imports()
-
+	if err = errors.Join(l.errs...); err != nil {
+		return nil, fmt.Errorf("could not generate file '%s': %w", outFile, err)
+	}
 	return &exportFile, nil
 }
 
@@ -185,7 +194,10 @@ func (l *loader) findType(expr ast.Expr) types.Type {
 			}
 			return nil
 		}
-		return types.Universe.Lookup(typeName).Type()
+		if found := types.Universe.Lookup(typeName); found != nil {
+			return found.Type()
+		}
+		return nil
 	case *ast.SelectorExpr:
 		pkgName := t.X.(*ast.Ident).Name
 		typeName := t.Sel.Name
@@ -203,7 +215,12 @@ func (l *loader) findType(expr ast.Expr) types.Type {
 
 func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImporter, cache *autoSetterFuncCache) (fun TemplateFunctionConfig, err error) {
 	fun.Name = f.Name.Name
-	fun.QualifiedName, err = it.useType(file.PkgPath, f.Name.Name)
+	if et := f.Config.ExternalType; et != nil {
+		fun.QualifiedName, err = it.useSelector(f.Config.ExternalType)
+	} else {
+		fun.QualifiedName, err = it.useType(file.PkgPath, fun.Name)
+	}
+
 	fun.WrapperName = prefix(fun.Name, f.Config.Prefix, funcPrefix)
 	if err != nil {
 		return TemplateFunctionConfig{}, err
@@ -220,18 +237,7 @@ func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImp
 		var arg TemplateFunctionArg
 		arg.Name = a.Name
 		arg.Type = it.resolveExpr(a.Type)
-		if setter, ok := f.Config.AttributeFunctions[a.Name]; ok {
-			arg.AttrKey = setter.Key
-			if typ := l.findType(setter.Func); typ != nil {
-				arg.AttrFunc = it.resolveExpr(setter.Func)
-				fun.ArgHasAttributes = true
-			} else {
-				if typ = l.findType(a.Type); typ != nil {
-					arg.AttrFunc = cache.autoSetterFunc(typ)
-				}
-				fun.ArgHasAttributes = fun.ArgHasAttributes || arg.AttrFunc != ""
-			}
-		}
+		fun.ArgHasAttributes = fun.ArgHasAttributes || l.extractFuncArgument(&f, &arg, a, it, cache)
 		if l.typeIsContext(a.Type) && ctxArg == -1 {
 			arg.Name = "ctx"
 			ctxArg = i
@@ -276,6 +282,47 @@ func (l *loader) createWrapperFunction(file *ParsedFile, f Function, it *typeImp
 		fun.Returns = append(fun.Returns, arg)
 	}
 	return fun, nil
+}
+
+func (l *loader) extractFuncArgument(f *Function, arg *TemplateFunctionArg, a Arg, it *typeImporter, cache *autoSetterFuncCache) bool {
+	setter, ok := f.Config.AttributeFunctions[a.Name]
+	if !ok {
+		return false
+	}
+	var typeParamName string
+	if id, ok := a.Type.(*ast.Ident); ok {
+		for _, tp := range f.TypeParams {
+			if tp.Name == id.Name {
+				typeParamName = tp.Name
+			}
+		}
+	}
+	if setter.Func != nil {
+		arg.AttrFunc = it.resolveExpr(setter.Func)
+		if arg.AttrFunc == "" {
+			l.recordError(a.Type.Pos(), fmt.Errorf("could not resolve attribute function %s", setter.Func))
+			return false
+		}
+		return true
+	}
+	if setter.Key == "" {
+		return false
+	}
+	if typeParamName != "" {
+		l.recordError(a.Type.Pos(), fmt.Errorf("cannot find auto-setter function for generic type %s", typeParamName))
+		return false
+	}
+	typ := l.findType(a.Type)
+	if typ == nil {
+		l.recordError(a.Type.Pos(), fmt.Errorf("cannot find type %s", a.Type))
+		return false
+	}
+	arg.AttrFunc = cache.autoSetterFunc(typ)
+	if arg.AttrFunc == "" {
+		l.recordError(a.Type.Pos(), fmt.Errorf("cannot find auto-setter function for type %s", a.Type))
+		return false
+	}
+	return true
 }
 
 type autoSetterFuncCache struct {

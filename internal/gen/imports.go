@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 	"golang.org/x/tools/go/packages"
 	"log"
 	"sort"
@@ -27,10 +28,22 @@ func newTypeImporter(pkgPath string, loader *loader) *typeImporter {
 	}
 }
 
+func (it *typeImporter) useSelector(et *ast.SelectorExpr) (string, error) {
+	pkgName := et.X.(*ast.Ident).Name
+	typeName := et.Sel.Name
+	if pkg, ok := it.loader.importNameToPackage[pkgName]; ok {
+		return it.useType(pkg.PkgPath, typeName)
+	}
+	return "", fmt.Errorf("package %s is not imported", pkgName)
+}
+
 func (it *typeImporter) useType(packagePath string, typeName string) (string, error) {
 	pkg, err := it.loader.importPackage(packagePath)
 	if err != nil {
 		return "", err
+	}
+	if pkg.PkgPath == it.currentPackage {
+		return typeName, nil
 	}
 	pkgName := it.namePackage(pkg)
 	return fmt.Sprintf("%s.%s", pkgName, typeName), nil
@@ -45,7 +58,10 @@ func (it *typeImporter) toQualifiedName(expr ast.Expr) (string, error) {
 		var ok bool
 		pkg, ok = it.loader.typeNameToPackage[typeName]
 		if !ok { // built-in type
-			return typeName, nil
+			if typ := types.Universe.Lookup(typeName); typ != nil {
+				return typeName, nil
+			}
+			return typeName, fmt.Errorf("could not resolve type '%s'", typeName)
 		}
 	case *ast.SelectorExpr:
 		id := t.X.(*ast.Ident)
@@ -57,10 +73,13 @@ func (it *typeImporter) toQualifiedName(expr ast.Expr) (string, error) {
 			if pkgPath, ok := it.loader.pkgNameToPkgPath[pkgName]; ok {
 				return it.useType(pkgPath, typeName)
 			}
-			//return pkgName, fmt.Errorf("package %s is not impoted", pkgName)
+			//return pkgName, fmt.Errorf("package %s is not imported", pkgName)
 		}
 	default:
 		return "", fmt.Errorf("unexpected qualified name type %T", expr)
+	}
+	if pkg.PkgPath == it.currentPackage {
+		return typeName, nil
 	}
 	pkgName := it.namePackage(pkg)
 	return fmt.Sprintf("%s.%s", pkgName, typeName), nil
@@ -93,6 +112,9 @@ func (it *typeImporter) namePackage(pkg *packages.Package) string {
 func (it *typeImporter) Imports() []TemplateImport {
 	imports := make([]TemplateImport, 0, len(it.packageToName))
 	for pkg, name := range it.packageToName {
+		if it.currentPackage == pkg {
+			continue // do not import current package
+		}
 		imports = append(imports, TemplateImport{
 			Name:    name,
 			Package: it.loader.pkgPathToPackage[pkg].Name,

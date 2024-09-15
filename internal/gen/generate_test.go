@@ -6,18 +6,36 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	//r, err := Generate(context.Background(), "../../example/complex.go", "../../example/gen/complex.gen.go", nil)
-	//if err != nil {
-	//	t.Fatalf("Generate failed: %v", err)
-	//}
-	//if err = r.WriteOutput(); err != nil {
-	//	t.Fatalf("WriteOutput failed: %v", err)
-	//}
-	r, err := Generate(context.Background(), "../../example/simple.go", "../../example/gen/simple.gen.go", nil)
-	if err != nil {
-		t.Fatalf("Generate failed: %v", err)
+	tests := []struct {
+		name       string
+		inputFile  string
+		outputFile string
+	}{
+		{
+			name:       "simple",
+			inputFile:  "../../example/simple.go",
+			outputFile: "../../example/gen/simple.gen.go",
+		},
+		{
+			name:       "complex",
+			inputFile:  "../../example/complex.go",
+			outputFile: "../../example/gen/complex.gen.go",
+		},
+		{
+			name:       "external",
+			inputFile:  "../../example/external/external.go",
+			outputFile: "../../example/external/external.gen.go",
+		},
 	}
-	if err = r.WriteOutput(); err != nil {
-		t.Fatalf("WriteOutput failed: %v", err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := Generate(context.Background(), tt.inputFile, tt.outputFile, nil)
+			if err != nil {
+				t.Fatalf("Generate failed: %v", err)
+			}
+			if err = r.WriteOutput(); err != nil {
+				t.Fatalf("WriteOutput failed: %v", err)
+			}
+		})
 	}
 }

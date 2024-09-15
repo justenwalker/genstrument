@@ -22,6 +22,14 @@ func (l *loader) toFunctionConfig(cg *ast.CommentGroup) (cfg FunctionConfig, ok 
 			ok = true
 			continue
 		}
+		if strings.HasPrefix(comment.Text, "external ") {
+			var err error
+			cfg.ExternalType, err = l.parseSelectorExpr(strings.TrimPrefix(comment.Text, "external "))
+			if err != nil {
+				l.recordError(comment.Pos, err)
+			}
+			continue
+		}
 		if strings.HasPrefix(comment.Text, "prefix ") {
 			cfg.Prefix = strings.TrimPrefix(comment.Text, "prefix ")
 			continue
@@ -79,6 +87,14 @@ func (l *loader) toInterfaceConfig(cg *ast.CommentGroup) (cfg InterfaceConfig, o
 			cfg.Prefix = strings.TrimPrefix(comment.Text, "prefix ")
 			continue
 		}
+		if strings.HasPrefix(comment.Text, "external ") {
+			var err error
+			cfg.ExternalType, err = l.parseSelectorExpr(strings.TrimPrefix(comment.Text, "external "))
+			if err != nil {
+				l.recordError(comment.Pos, err)
+			}
+			continue
+		}
 		if strings.HasPrefix(comment.Text, "constructor ") {
 			cfg.ConstructorPrefix = strings.TrimPrefix(comment.Text, "constructor ")
 			continue
@@ -91,6 +107,17 @@ func (l *loader) toInterfaceConfig(cg *ast.CommentGroup) (cfg InterfaceConfig, o
 type Comment struct {
 	Text string
 	Pos  token.Pos
+}
+
+func (l *loader) parseSelectorExpr(expr string) (*ast.SelectorExpr, error) {
+	pkgType := strings.SplitN(strings.TrimSpace(expr), ".", 2)
+	if len(pkgType) != 2 {
+		return nil, fmt.Errorf("invalid selector expression '%s': expected 'package.TypeName'", expr)
+	}
+	return &ast.SelectorExpr{
+		X:   &ast.Ident{Name: pkgType[0]},
+		Sel: &ast.Ident{Name: pkgType[1]},
+	}, nil
 }
 
 func extractDocComments(cg *ast.CommentGroup) []Comment {

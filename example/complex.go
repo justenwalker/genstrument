@@ -16,7 +16,7 @@ import (
 // +genstrument:wrap
 // +genstrument:constructor Trace
 // +genstrument:prefix traced
-type GenericService[T any, PT int] interface {
+type GenericService[T any, PT cmp.Ordered] interface {
 	FuncIsGeneric(ctx context.Context, t T) (PT, error)
 }
 

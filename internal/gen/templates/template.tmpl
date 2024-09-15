@@ -21,6 +21,18 @@ func {{ $t.ConstructorName }}{{ $t.TypeParamSpec }}(tracer genstrument.Tracer, w
     }
 }
 
+{{- if $t.ExternalType }}
+// compile-time type check to keep {{ $t.QualifiedName }} and {{ $t.Name }} in sync.
+// if this results in a compile error, it means they are not identical and this must be fixed.
+{{- if $t.TypeParamSpec }}
+func _typecheck_{{ $t.Name }}{{ $t.TypeParamSpec }}() {{ $t.QualifiedName }}{{ $t.TypeParamNames }} {
+  return *new({{ $t.Name }}{{ $t.TypeParamNames }})
+}
+{{- else }}
+var _ {{ $t.QualifiedName }} = *new({{ $t.Name }})
+{{- end }}
+{{- end }}
+
 type {{ $t.TypeName }}{{ $t.TypeParamSpec }} struct {
     wrapped {{ $typeName }}{{ $t.TypeParamNames }}
     tracer genstrument.Tracer
