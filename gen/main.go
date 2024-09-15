@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/justenwalker/genstrument/cmd/gen/internal/gen"
 	"log"
 	"os"
 )
@@ -22,7 +21,7 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-	res, err := gen.Generate(ctx, inFile, outFile, &gen.Options{})
+	res, err := Generate(ctx, inFile, outFile, &Options{})
 	if err != nil {
 		log.Fatalf("Generate failed: %v", err)
 	}

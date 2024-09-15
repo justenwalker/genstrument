@@ -1,4 +1,4 @@
-package gen
+package main
 
 import (
 	"context"
@@ -14,18 +14,18 @@ func TestGenerate(t *testing.T) {
 	}{
 		{
 			name:       "simple",
-			inputFile:  "../../../../example/simple.go",
-			outputFile: "../../../../example/gen/simple.gen.go",
+			inputFile:  "../example/simple.go",
+			outputFile: "../example/gen/simple.gen.go",
 		},
 		{
 			name:       "complex",
-			inputFile:  "../../../../example/complex.go",
-			outputFile: "../../../../example/gen/complex.gen.go",
+			inputFile:  "../example/complex.go",
+			outputFile: "../example/gen/complex.gen.go",
 		},
 		{
 			name:       "external",
-			inputFile:  "../../../../example/external/external.go",
-			outputFile: "../../../../example/external/external.gen.go",
+			inputFile:  "../example/external/external.go",
+			outputFile: "../example/external/external.gen.go",
 		},
 	}
 	g := goldie.New(t)

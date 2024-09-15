@@ -24,4 +24,4 @@ require (
 
 replace github.com/justenwalker/genstrument => ../
 
-replace github.com/justenwalker/genstrument/cmd/gen => ../cmd/gen
+replace github.com/justenwalker/genstrument/cmd/gen => ./../gen
