@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"github.com/justenwalker/genstrument/example"
 	"github.com/justenwalker/genstrument/example/gen"
+	"github.com/justenwalker/genstrument/example/oteltracer"
 	"github.com/justenwalker/genstrument/example/types"
 	"github.com/justenwalker/genstrument/example/types/dot"
 	gopkg "github.com/justenwalker/genstrument/example/types/go-pkg"
-	"github.com/justenwalker/genstrument/oteltracer"
 	"log"
 
 	"github.com/go-logr/stdr"
@@ -22,6 +22,10 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
+
+//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../simple.go -output ../gen/simple.gen.go
+//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../complex.go -output ../gen/complex.gen.go
+//go:generate go run github.com/justenwalker/genstrument/cmd/gen -input ../external/external.go -output ../external/external.gen.go
 
 var (
 	fooKey     = attribute.Key("ex.com/foo")

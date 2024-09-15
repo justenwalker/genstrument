@@ -26,7 +26,6 @@ func (w *instrumentedSimpleService) SayHello(ctx context.Context, message string
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "example.SimpleService:SayHello")
 	// Set Input Attributes
-	genstrument.SetStringAttribute(message, span.Attribute("message"))
 
 	// call Wrapped Function
 	result, err = w.wrapped.SayHello(ctx, message)

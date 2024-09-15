@@ -15,7 +15,7 @@ func main() {
 		outFile string
 	)
 	flag.StringVar(&inFile, "input", "", "Input File to parse")
-	flag.StringVar(&inFile, "output", "", "Output file to write generated code.")
+	flag.StringVar(&outFile, "output", "", "Output file to write generated code.")
 	flag.Parse()
 	if inFile == "" || outFile == "" {
 		log.Println("Must provide an -input and -output flag")

@@ -13,14 +13,14 @@ import (
 )
 
 // TraceGenericService adds APM traces around the wrapped example.GenericService using the provided tracer.
-func TraceGenericService[T any, PT int](tracer genstrument.Tracer, wrapped example.GenericService[T, PT]) example.GenericService[T, PT] {
+func TraceGenericService[T any, PT cmp.Ordered](tracer genstrument.Tracer, wrapped example.GenericService[T, PT]) example.GenericService[T, PT] {
 	return &tracedGenericService[T, PT]{
 		tracer:  tracer,
 		wrapped: wrapped,
 	}
 }
 
-type tracedGenericService[T any, PT int] struct {
+type tracedGenericService[T any, PT cmp.Ordered] struct {
 	wrapped example.GenericService[T, PT]
 	tracer  genstrument.Tracer
 }
@@ -74,8 +74,6 @@ func (w *instrumentedComplexService) FuncArray(ctx context.Context, str string, 
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "example.ComplexService:FuncArray")
 	// Set Input Attributes
-	example.StringAttributeSetter(str, span.Attribute("key1"))
-	example.ServiceTypeSetter(st, span.Attribute("key2"))
 
 	// call Wrapped Function
 	res0, err = w.wrapped.FuncArray(ctx, str, st)
@@ -84,6 +82,9 @@ func (w *instrumentedComplexService) FuncArray(ctx context.Context, str string, 
 		span.EndError(err)
 		return
 	}
+	// Set Return Attributes
+	example.AnyTypeSetter(res0, span.Attribute("result"))
+	example.AnyTypeSetter(err, span.Attribute("error"))
 
 	// Finish Span with Success
 	span.EndSuccess(ctx)
@@ -95,8 +96,6 @@ func (w *instrumentedComplexService) FuncSlice(ctx context.Context, name example
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "example.ComplexService:FuncSlice")
 	// Set Input Attributes
-	example.StringAttributeSetter(name, span.Attribute("key1"))
-	example.ServiceTypeSetter(st, span.Attribute("key2"))
 
 	// call Wrapped Function
 	ret0, err = w.wrapped.FuncSlice(ctx, name, st)
@@ -134,7 +133,6 @@ func (w *instrumentedComplexService) FuncPackageType(ctx context.Context, myType
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "packageType")
 	// Set Input Attributes
-	types.MyTypeAttr(myType, span.Attribute("type"))
 
 	// call Wrapped Function
 	ret0, err = w.wrapped.FuncPackageType(ctx, myType)
@@ -154,9 +152,6 @@ func (w *instrumentedComplexService) FuncDotTypes(ctx context.Context, name exam
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "dots")
 	// Set Input Attributes
-	genstrument.SetStringAttribute(name, span.Attribute("name"))
-	dot.Type1Attr(d1, span.Attribute("dot1"))
-	dot.Type2Attr(d2, span.Attribute("dot2"))
 
 	// call Wrapped Function
 	ret0, err = w.wrapped.FuncDotTypes(ctx, name, d1, d2)
@@ -176,7 +171,6 @@ func (w *instrumentedComplexService) FuncMyDupeType(ctx context.Context, myType 
 	var span genstrument.Span
 	ctx, span = w.tracer.StartSpan(ctx, "dupes")
 	// Set Input Attributes
-	types.MyTypeAttr(myType, span.Attribute("mine"))
 
 	// call Wrapped Function
 	ret0, err = w.wrapped.FuncMyDupeType(ctx, myType)
@@ -197,10 +191,7 @@ func TraceMyFunction(tr genstrument.Tracer) func(ctx context.Context, s example.
 		var span genstrument.Span
 		ctx, span = tr.StartSpan(ctx, "func1")
 		// Set Input Attributes
-		example.AnyTypeSetter(s, span.Attribute("key1"))
-		example.AnyTypeSetter(d1, span.Attribute("key2"))
-		example.AnyTypeSetter(d2, span.Attribute("key3"))
-		example.AnyTypeSetter(myType, span.Attribute("key4"))
+		example.AnyTypeSetter(s, span.Attribute(""))
 
 		// call Wrapped Function
 		ret0, err = example.MyFunction(ctx, s, d1, d2, myType)
@@ -222,10 +213,7 @@ func TraceGenericFunction[T ~string, PT *T, PTT cmp.Ordered](tr genstrument.Trac
 		var span genstrument.Span
 		ctx, span = tr.StartSpan(ctx, "example:GenericFunction")
 		// Set Input Attributes
-		example.AnyTypeSetter(t, span.Attribute("key1"))
-		example.AnyTypeSetter(tr0, span.Attribute("key2"))
-		example.AnyTypeSetter(pt, span.Attribute("key3"))
-		example.AnyTypeSetter(err, span.Attribute("key4"))
+		example.AnyTypeSetter(t, span.Attribute(""))
 
 		// call Wrapped Function
 		ret0, err1 = example.GenericFunction[T, PT, PTT](ctx, t, tr0, pt, err)
