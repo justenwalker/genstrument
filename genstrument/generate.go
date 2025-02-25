@@ -61,7 +61,7 @@ func Generate(ctx context.Context, inputFile string, outputFile string, opts *Op
 
 const (
 	constructorPrefix = "Instrument"
-	typePrefix        = "instrumented"
+	typePrefix        = "Instrumented"
 	funcPrefix        = "Trace"
 )
 
@@ -100,6 +100,7 @@ func (l *loader) generate(file *ParsedFile, outFile string) (*TemplateData, erro
 			wi.ExternalType = it.resolveExpr(iface.Config.ExternalType)
 		}
 		wi.ConstructorName = prefix(wi.Name, iface.Config.ConstructorPrefix, constructorPrefix)
+		wi.ConstructorInterface = iface.Config.ConstructorInterface
 		wi.TypeName = prefix(wi.Name, iface.Config.Prefix, typePrefix)
 		for _, f := range iface.Functions {
 			fun, err := l.createWrapperFunction(file, f, it, cache)

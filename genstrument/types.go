@@ -34,9 +34,10 @@ type Function struct {
 }
 
 type InterfaceConfig struct {
-	Prefix            string
-	ExternalType      *ast.SelectorExpr
-	ConstructorPrefix string
+	Prefix               string
+	ExternalType         *ast.SelectorExpr
+	ConstructorPrefix    string
+	ConstructorInterface bool
 }
 
 type Interface struct {
@@ -94,13 +95,14 @@ type TemplateFunctionArg struct {
 }
 
 type TemplateTypeConfig struct {
-	Name            string
-	ExternalType    string
-	TypeName        string
-	ConstructorName string
-	QualifiedName   string
-	TypeParamSpec   string
-	TypeParamNames  string
-	Config          InterfaceConfig
-	Functions       []TemplateFunctionConfig
+	Name                 string
+	ExternalType         string
+	TypeName             string
+	ConstructorName      string
+	ConstructorInterface bool
+	QualifiedName        string
+	TypeParamSpec        string
+	TypeParamNames       string
+	Config               InterfaceConfig
+	Functions            []TemplateFunctionConfig
 }

@@ -11,20 +11,33 @@ import (
 	"github.com/justenwalker/genstrument"
 )
 
-// GenericService
+// MyWrappedInterface
+// Makes an unexported interface wrapper, but returns the interface from the constructor.
 //
 // +genstrument:wrap
 // +genstrument:constructor Trace
-// +genstrument:prefix traced
+// +genstrument:constructor:interface
+// +genstrument:prefix unexported
+type MyWrappedInterface interface {
+	Foo(ctx context.Context) string
+}
+
+// GenericService
+// Makes sure we can construct a generic wapper with type parameters.
+//
+// +genstrument:wrap
+// +genstrument:constructor Trace
+// +genstrument:prefix Traced
 type GenericService[T any, PT cmp.Ordered] interface {
 	FuncIsGeneric(ctx context.Context, t T) (PT, error)
 }
 
 // ComplexService
+// Lots of functions with various setter options and arguments from other packages.
 //
 // +genstrument:wrap
 // +genstrument:constructor Instrument
-// +genstrument:prefix instrumented
+// +genstrument:prefix Instrumented
 type ComplexService interface {
 	FuncNoError(ctx context.Context)
 	// +genstrument:attr key1 str StringAttributeSetter
@@ -52,6 +65,7 @@ type ComplexService interface {
 }
 
 // MyFunction
+// Wrapping a single function.
 //
 // +genstrument:wrap
 // +genstrument:prefix Trace
@@ -65,6 +79,7 @@ func MyFunction(ctx context.Context, s ServiceType, d1 Type1Dot, d2 Type2Dot, my
 }
 
 // GenericFunction
+// Wrapping a Generic Function.
 //
 // +genstrument:wrap
 // +genstrument:prefix Trace
@@ -77,6 +92,7 @@ func GenericFunction[T ~string, PT *T, PTT cmp.Ordered](ctx context.Context, t T
 }
 
 // GenericTypeConstraints
+// Wrapping a generic function with type constraints.
 //
 // +genstrument:wrap
 // +genstrument:prefix Observe

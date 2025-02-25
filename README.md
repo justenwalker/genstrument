@@ -70,6 +70,27 @@ This determines the prefix used for the Constructor function generated
 for this wrapper type. The name of the constructor function follows the format
 `{{constructor}}{{InterfaceName}}` like `InstrumentMyInterface`.
 
+
+### `// +genstrument:constructor:interface`
+
+**Example**: `// +genstrument:constructor:interface`
+
+Instead of the constructor returning the wrapper type,
+it will instead return the wrapped interface type.
+
+#### Without `// +genstrument:constructor:interface`
+
+```go
+func InstrumentMyInterface(tracer genstrument.Tracer, wrapped MyInterface) *InstrumentedMyInterface
+```
+
+#### With `// +genstrument:constructor:interface`
+
+```go
+func InstrumentMyInterface(tracer genstrument.Tracer, wrapped MyInterface) MyInterface
+```
+
+
 ### `// +genstrument:prefix <wrapperTypePrefix>`
 
 **Examples**:

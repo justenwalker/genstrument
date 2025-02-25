@@ -99,6 +99,10 @@ func (l *loader) toInterfaceConfig(cg *ast.CommentGroup) (cfg InterfaceConfig, o
 			cfg.ConstructorPrefix = strings.TrimPrefix(comment.Text, "constructor ")
 			continue
 		}
+		if comment.Text == "constructor:interface" {
+			cfg.ConstructorInterface = true
+			continue
+		}
 		l.recordError(comment.Pos, fmt.Errorf("unknown interface comment: %s", comment.Text))
 	}
 	return
